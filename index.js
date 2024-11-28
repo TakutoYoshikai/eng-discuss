@@ -1,6 +1,35 @@
+#!/usr/bin/env node
+
 import ollama from 'ollama';
 import readline from 'readline-sync'
 
+const config = {
+  me: {
+    name: 'John',
+    age: 26,
+    gender: 'man'
+  },
+  others: [
+    {
+      name: 'Kenji',
+      age: 40,
+      gender: 'man',
+      personality: 'You are a professor of computer science.'
+    },
+    {
+      name: 'Taro',
+      age: 40,
+      gender: 'man',
+      personality: 'You are a professor of policy management.'
+    },
+    {
+      name: 'Emma',
+      age: 40,
+      gender: 'woman',
+      personality: 'You are a journalist for 20 years.'
+    },
+  ]
+}
 class Discussion {
   constructor() {
     this.talk = [];
@@ -13,8 +42,6 @@ class Discussion {
   }
 }
 
-const category = 'AI technology';
-const subcategory = 'Siri';
 
 class Person {
   constructor(props) {
@@ -24,58 +51,76 @@ class Person {
     this.personality = props.personality;
   }
   system() {
-    return `Your name is ${this.name}. ${this.age} years old ${this.gender}. ${this.personality}. This is an English classroom. We are discussing some theme in English. category is ${category}. subcategory is ${subcategory}. Don't comment too long sentence.`;
+    return `Your name is ${this.name}. ${this.age} years old ${this.gender}. ${this.personality}. This is an English classroom. We are discussing some theme in English`;
   }
   user(summary) {
-    return `Please comment something by your own words.
+    return `Please comment something by your own words. less than 3 sentences.
 # Discussion
 ${summary}
 `
   }
 }
 
+const students = config.others.map(c => new Person(c));
+const me = new Person(config.me);
+students.push(me);
 
-const students = [
-  new Person({
-    name: 'Kenny',
-    age: 18,
-    gender: 'man',
-    personality: 'You have a positive mindset and favors adventurous ideas. He is unafraid of failure and always thinks about the future.'
-  }),
-  new Person({
-    name: 'Hange',
-    age: 18,
-    gender: 'woman',
-    personality: 'You have a negative mindset and constantly thinks about failure. She dislikes being disliked by others and prefers the safest solutions whenever possible.'
-  }),
-]
-
-
-const me = new Person({
-    name: 'Biri',
-    age: 20,
-    gender: 'man',
-});
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
 const discussion = new Discussion();
 
-for (let i = 0; i < 5; i++) {
+
+async function showPrompt() {
   const q = readline.question('You: ');
-  process.stdout.write(`\n`);
-  discussion.push(me.name, q);
-  for (let j = 0; j < 2; j++) {
-    const response = await ollama.chat({ model: 'llama3.2', messages: [
+  if (q === '') {
+    return;
+  } else if (q === 'translate') {
+    const latest = discussion.talk[discussion.talk.length - 1];
+    const comment = latest.comment;
+    const response = await ollama.chat({ model: 'gemma2:latest', messages: [
       {
-        role: 'system',
-        content: students[j].system(),
-      }, {
-        role: 'user',
-        content: students[j].user(discussion.summarize()),
+        'role': 'system',
+        'content': 'You are a good interpreter. translate English to Japanese without irrelevant comments.'
+      },
+      {
+        'role': 'user',
+        'content': `${comment}`,
       }
     ]});
-    discussion.push(students[j].name, response.message.content);
-    process.stdout.write(`${students[j].name}: ${response.message.content}\n\n`);
+    process.stdout.write(`${latest.name}: ${response.message.content}\n\n`);
+    await showPrompt();
+    return;
+  }
+  process.stdout.write(`\n`);
+  discussion.push(me.name, q);
+}
+
+async function main() {
+  showPrompt();
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < students.length; j++) {
+      const response = await ollama.chat({ model: 'llama3.2', messages: [
+        {
+          role: 'system',
+          content: students[j].system(),
+        }, {
+          role: 'user',
+          content: students[j].user(discussion.summarize()),
+        }
+      ]});
+      discussion.push(students[j].name, response.message.content);
+      process.stdout.write(`${students[j].name}: ${response.message.content}\n\n`);
+      showPrompt();
+    }
   }
 }
 
-console.info(discussion.summarize());
+if (import.meta.url === new URL('', import.meta.url).href) {
+  main();
+}
 

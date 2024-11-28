@@ -10,6 +10,9 @@
   "author": "Takuto Yoshikai <takuto.yoshikai@gmail.com> (https://yoshikai.net/en)",
   "license": "ISC",
   "description": "",
+  "bin": {
+    "discussion": "./index.js"
+  },
   "dependencies": {
     "ollama": "^0.5.10",
     "readline-sync": "^1.4.10"
