@@ -16,4 +16,4 @@ npm install -g TakutoYoshikai/eng-discuss
 discussion
 ```
 
-<img src="discuss.png" width="400">
+<img src="discuss.png" width="600">
