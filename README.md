@@ -8,7 +8,7 @@ ollama pull llama3.2
 ```
 3. npm install
 ```
-npm install -g TakutoYoshikai/eng-discuss
+npm install -g TakutoYoshikai/english-discussion
 ```
 
 ### Usage
