@@ -102,7 +102,7 @@ async function showPrompt() {
 
 async function main() {
   showPrompt();
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 7; i++) {
     for (let j = 0; j < students.length; j++) {
       const response = await ollama.chat({ model: 'llama3.2', messages: [
         {
