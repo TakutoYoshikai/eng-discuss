@@ -17,3 +17,6 @@ discussion
 ```
 
 <img src="discuss.png" width="600">
+
+### License
+MIT license
